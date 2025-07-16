@@ -1,12 +1,14 @@
+import sys
 from PyQt5.QtWidgets import QApplication, QMainWindow, QDesktopWidget
 from designQT5 import Ui_MainWindow
+from admin_logic import AdminLogic
+from student_logic import StudentLogic
 
-class MainApp(QMainWindow):
+class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
-        self.setCentralWidget(self.ui.centralwidget)
         self.ui.stackedWidget.setCurrentWidget(self.ui.main)
         self.setWindowTitle("Welcome to UniHub!")
         self.center()
@@ -74,23 +76,24 @@ class MainApp(QMainWindow):
             QFrame {background: transparent;}
             
         """)
-
+        
         self.ui.stackedWidget.setCurrentWidget(self.ui.main)
 
         self.ui.admin_opt.clicked.connect(self.admin_login)
-        self.ui.student_opt.clicked.connect(self.student_in)
-        self.ui.auth_btn_student.clicked.connect(self.student_page)
-        self.ui.reg_btn.clicked.connect(self.student_page)
-        self.ui.auth_btn_admin.clicked.connect(self.admin_page)
+        self.ui.student_opt.clicked.connect(self.student_login)
         self.ui.admin_back.clicked.connect(self.options_page)
         self.ui.student_back.clicked.connect(self.options_page)
         self.setStatusBar(None)
+
+        self.admin_logic = AdminLogic(self)
+        self.student_logic = StudentLogic(self)
+
 
     def admin_login(self):
         self.ui.stackedWidget.setCurrentWidget(self.ui.admin)
         self.setWindowTitle("ადმინის შესვლა")
 
-    def student_in(self):
+    def student_login(self):
         self.ui.stackedWidget.setCurrentWidget(self.ui.student)
         self.setWindowTitle("აბიტურიენტის შესვლა")
 
@@ -108,11 +111,9 @@ class MainApp(QMainWindow):
         self.repaint()
 
 
+
 if __name__ == "__main__":
-    import sys
     app = QApplication(sys.argv)
-    window = MainApp()
+    window = MainWindow()
     window.show()
     sys.exit(app.exec_())
-
-
