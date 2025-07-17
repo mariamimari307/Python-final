@@ -83,6 +83,9 @@ class MainWindow(QMainWindow):
         self.ui.student_opt.clicked.connect(self.student_login)
         self.ui.admin_back.clicked.connect(self.options_page)
         self.ui.student_back.clicked.connect(self.options_page)
+        self.ui.back_main_admin.clicked.connect(self.options_page)
+        self.ui.back_main_student.clicked.connect(self.options_page)
+
         self.setStatusBar(None)
 
         self.admin_logic = AdminLogic(self)
@@ -111,7 +114,6 @@ class MainWindow(QMainWindow):
         self.ui.stackedWidget.setCurrentWidget(self.ui.main)
         self.setWindowTitle("Welcome to UniHub!")
         self.repaint()
-
 
 
 if __name__ == "__main__":

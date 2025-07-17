@@ -230,6 +230,14 @@ class Ui_MainWindow(object):
         self.desc_label_2.setFrameShadow(QtWidgets.QFrame.Plain)
         self.desc_label_2.setTextFormat(QtCore.Qt.AutoText)
         self.desc_label_2.setObjectName("desc_label_2")
+        self.back_main_student = QtWidgets.QPushButton(self.student_profile)
+        self.back_main_student.setGeometry(QtCore.QRect(10, 470, 131, 31))
+        font = QtGui.QFont()
+        font.setFamily("Ubuntu Mono")
+        font.setBold(True)
+        font.setWeight(75)
+        self.back_main_student.setFont(font)
+        self.back_main_student.setObjectName("back_main_student")
         self.stackedWidget.addWidget(self.student_profile)
         self.admin = QtWidgets.QWidget()
         self.admin.setObjectName("admin")
@@ -396,6 +404,14 @@ class Ui_MainWindow(object):
         self.uni_input_admin_2 = QtWidgets.QLineEdit(self.admin_base)
         self.uni_input_admin_2.setGeometry(QtCore.QRect(220, 100, 251, 31))
         self.uni_input_admin_2.setObjectName("uni_input_admin_2")
+        self.back_main_admin = QtWidgets.QPushButton(self.admin_base)
+        self.back_main_admin.setGeometry(QtCore.QRect(10, 10, 131, 31))
+        font = QtGui.QFont()
+        font.setFamily("Ubuntu Mono")
+        font.setBold(True)
+        font.setWeight(75)
+        self.back_main_admin.setFont(font)
+        self.back_main_admin.setObjectName("back_main_admin")
         self.stackedWidget.addWidget(self.admin_base)
         MainWindow.setCentralWidget(self.centralwidget)
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
@@ -403,7 +419,7 @@ class Ui_MainWindow(object):
         MainWindow.setStatusBar(self.statusbar)
 
         self.retranslateUi(MainWindow)
-        self.stackedWidget.setCurrentIndex(3)
+        self.stackedWidget.setCurrentIndex(4)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
@@ -434,6 +450,7 @@ class Ui_MainWindow(object):
         self.add_btn_student.setText(_translate("MainWindow", "დამატება"))
         self.del_btn_student.setText(_translate("MainWindow", "წაშლა"))
         self.desc_label_2.setText(_translate("MainWindow", "<html><head/><body><p align=\"justify\"><span style=\" font-size:10pt; font-weight:400; color:#000000;\">ინფორმაციის შეყვანისას დარწმუნდით მის სისწორეში.</span></p></body></html>"))
+        self.back_main_student.setText(_translate("MainWindow", "მთავარი"))
         self.auth_btn_admin.setText(_translate("MainWindow", "ავტორიზაცია"))
         self.pass_admin.setText(_translate("MainWindow", "<html><head/><body><p align=\"right\"><span style=\" color:#ffffff;\">პაროლი</span></p></body></html>"))
         self.precise_label_admin.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-size:9pt; color:#000000;\">სისტემაში შესასვლელად შეიყვანეთ ზუსტი მონაცემები</span></p></body></html>"))
@@ -455,3 +472,14 @@ class Ui_MainWindow(object):
         item = self.priority_table_2.horizontalHeaderItem(3)
         item.setText(_translate("MainWindow", "სასწავლო დაწესებულება"))
         self.uni_admin_2.setText(_translate("MainWindow", "<html><head/><body><p align=\"right\"><span style=\" color:#ffffff;\">ID:</span></p></body></html>"))
+        self.back_main_admin.setText(_translate("MainWindow", "მთავარი"))
+
+
+if __name__ == "__main__":
+    import sys
+    app = QtWidgets.QApplication(sys.argv)
+    MainWindow = QtWidgets.QMainWindow()
+    ui = Ui_MainWindow()
+    ui.setupUi(MainWindow)
+    MainWindow.show()
+    sys.exit(app.exec_())
