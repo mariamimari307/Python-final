@@ -1,6 +1,8 @@
 import sqlite3
 from PyQt5.QtWidgets import QMessageBox
 from database import connect_db
+from PyQt5 import QtWidgets
+
 
 class AdminLogic:
     def __init__(self, main_window):
@@ -9,35 +11,45 @@ class AdminLogic:
 
         self.ui.auth_btn_admin.clicked.connect(self.login_admin)
         self.ui.add_btn_admin.clicked.connect(self.add_university)
+        self.ui.del_btn_admin.clicked.connect(self.delete_university)
+        self.ui.renew_btn_admin.clicked.connect(self.update_university) 
         
 
     def login_admin(self):
         username = self.ui.name_input.text()
         password = self.ui.pass_input_admin.text()
-        conn = connect_db()
-        cur = conn.cursor()
-        cur.execute("SELECT * FROM admin WHERE username=? AND password=?", (username, password))
-        if cur.fetchone():
-            self.ui.stackedWidget.setCurrentWidget(self.ui.admin_base)
-        else:
-            QMessageBox.warning(self.main_window, "შეცდომა", "არასწორი მონაცემები.")
-        conn.close()
+        try:
+            conn = connect_db()
+            cur = conn.cursor()
+            cur.execute("SELECT * FROM admin WHERE username=? AND password=?", (username, password))
+            if cur.fetchone():
+                self.ui.stackedWidget.setCurrentWidget(self.ui.admin_base)
+            else:
+                QMessageBox.warning(self.main_window, "შეცდომა", "არასწორი მონაცემები.")
+        except Exception as e:
+            QMessageBox.critical(self.main_window, "ბაზის შეცდომა", f"შეცდომა: {e}")
+        finally:
+            conn.close()
 
     def select_university(self):
         id = self.ui.uni_input_admin_2.text()
         if not id:
             QMessageBox.warning(self.main_window, "შეცდომა", "უნივერსიტეტის სახელი უნდა იყოს მითითებული.")
             return
-        conn = connect_db()
-        cur = conn.cursor()
-        cur.execute("SELECT * FROM universities WHERE name=?", (id,))
-        university = cur.fetchone()
-        if university:
-            self.ui.faculty_input_admin.setText(university[2])
-            self.ui.count_input_admin.setText(str(university[5]))
-        else:
-            QMessageBox.warning(self.main_window, "შეცდომა", "უნივერსიტეტი ვერ მოიძებნა.")
-        conn.close()
+        try:
+            conn = connect_db()
+            cur = conn.cursor()
+            cur.execute("SELECT * FROM universities WHERE name=?", (id,))
+            university = cur.fetchone()
+            if university:
+                self.ui.faculty_input_admin.setText(university[2])
+                self.ui.count_input_admin.setText(str(university[5]))
+            else:
+                QMessageBox.warning(self.main_window, "შეცდომა", "უნივერსიტეტი ვერ მოიძებნა.")
+        except Exception as e:
+            QMessageBox.critical(self.main_window, "შეცდომა", f"ბაზასთან კავშირის პრობლემა: {e}")
+        finally:
+            conn.close()
 
     def add_university(self):
         id = self.ui.uni_input_admin_2.text()
@@ -47,36 +59,40 @@ class AdminLogic:
         if not all([id, name, faculty, count]):
             QMessageBox.warning(self.main_window, "შეცდომა", "ყველა ველი სავალდებულოა.")
             return
-        conn = connect_db()
-        cur = conn.cursor()
         try:
-            cur.execute("INSERT INTO universities (uni_id,name,faculty,places) VALUES (?,?,?,?)",
-                        (id, name, faculty, count))
+            conn = connect_db()
+            cur = conn.cursor()
+            cur.execute("INSERT INTO universities (uni_id,name,faculty,places) VALUES (?,?,?,?)", (id, name, faculty, count))
             conn.commit()
             QMessageBox.information(self.main_window, "წარმატება", "უნივერსიტეტი დამატებულია.")
             self.ui.uni_input_admin_2.clear()
             self.ui.uni_input_admin.clear()
             self.ui.faculty_input_admin.clear()
             self.ui.count_input_admin.clear()
+        except sqlite3.IntegrityError:
+            QMessageBox.warning(self.main_window, "შეცდომა", "ასეთი ID ან დასახელება უკვე არსებობს.")
         except Exception as e:
-            QMessageBox.warning(self.main_window, "შეცდომა", f"დაფიქსირდა შეცდომა: {e}")
+            QMessageBox.critical(self.main_window, "შეცდომა", f"შეცდომა დამატებისას: {e}")
         finally:
             conn.close()
 
     def delete_university(self):
         id = self.ui.uni_input_admin_2.text()
         if not id:
-            QMessageBox.warning(self.main_window, "შეცდომა", "უნივერსიტეტის სახელი უნდა იყოს მითითებული.")
+            QMessageBox.warning(self.main_window, "შეცდომა", "უნივერსიტეტის ID უნდა იყოს მითითებული.")
             return
-        conn = connect_db()
-        cur = conn.cursor()
         try:
+            conn = connect_db()
+            cur = conn.cursor()
             cur.execute("DELETE FROM universities WHERE uni_id=?", (id,))
-            conn.commit()
-            QMessageBox.information(self.main_window, "წარმატება", "უნივერსიტეტი წაშლილია.")
-            self.ui.uni_input_admin_2.clear()
+            if cur.rowcount == 0:
+                QMessageBox.information(self.main_window, "შეტყობინება", "მონაცემი ვერ მოიძებნა.")
+            else:
+                conn.commit()
+                QMessageBox.information(self.main_window, "წარმატება", "უნივერსიტეტი წაშლილია.")
+                self.ui.uni_input_admin_2.clear()
         except Exception as e:
-            QMessageBox.warning(self.main_window, "შეცდომა", f"დაფიქსირდა შეცდომა: {e}")
+            QMessageBox.critical(self.main_window, "შეცდომა", f"წაშლის შეცდომა: {e}")
         finally:
             conn.close()
 

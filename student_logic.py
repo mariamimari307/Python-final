@@ -13,33 +13,48 @@ class StudentLogic:
     def login_student(self):
         personal_id = self.ui.id_input.text()
         password = self.ui.pass_input_student.text()
-        conn = connect_db()
-        cur = conn.cursor()
-        cur.execute("SELECT * FROM students WHERE personal_id=? AND password=?", (personal_id, password))
-        if cur.fetchone():
-            self.ui.stackedWidget.setCurrentWidget(self.ui.student_profile)
-        else:
-            QMessageBox.warning(self.main_window, "შეცდომა", "არასწორი მონაცემები.")
-        conn.close()
+        if not self.is_valid_personal_id(personal_id):
+            QMessageBox.warning(self.main_window, "შეცდომა", "პირადი ნომერი უნდა შეიცავდეს მხოლოდ 11 ციფრს.")
+            return
+        try:
+            conn = connect_db()
+            cur = conn.cursor()
+            cur.execute("SELECT * FROM students WHERE personal_id=? AND password=?", (personal_id, password))
+            if cur.fetchone():
+                self.ui.stackedWidget.setCurrentWidget(self.ui.student_profile)
+            else:
+                QMessageBox.warning(self.main_window, "შეცდომა", "არასწორი მონაცემები.")
+        except Exception as e:
+            QMessageBox.critical(self.main_window, "ბაზის შეცდომა", f"დაფიქსირდა ბაზის შეცდომა: {e}")
+        finally:
+            conn.close()
 
     def register_student(self):
         personal_id = self.ui.id_input.text()
         password = self.ui.pass_input_student.text()
+
+        if not self.is_valid_personal_id(personal_id):
+            QMessageBox.warning(self.main_window, "შეცდომა", "პირადი ნომერი უნდა შეიცავდეს მხოლოდ 11 ციფრს.")
+            return
         if not all([personal_id, password]):
             QMessageBox.warning(self.main_window, "შეცდომა", "ყველა ველი სავალდებულოა.")
             return
-        conn = connect_db()
-        cur = conn.cursor()
         try:
-            cur.execute("INSERT INTO students (personal_id, password) VALUES (?, ?)",
-                        (personal_id, password))
+            conn = connect_db()
+            cur = conn.cursor()
+            cur.execute("INSERT INTO students (personal_id, password) VALUES (?, ?)", (personal_id, password))
             conn.commit()
             QMessageBox.information(self.main_window, "წარმატება", "სტუდენტი რეგისტრირებულია.")
             self.login_student()
+        except sqlite3.IntegrityError:
+            QMessageBox.warning(self.main_window, "შეცდომა", "ეს პირადი ნომერი უკვე რეგისტრირებულია.")
         except Exception as e:
-            QMessageBox.warning(self.main_window, "შეცდომა", f"დაფიქსირდა შეცდომა: {e}")
+            QMessageBox.critical(self.main_window, "შეცდომა", f"დაფიქსირდა შეცდომა: {e}")
         finally:
             conn.close()
+
+    def is_valid_personal_id(self, personal_id):
+        return personal_id.isdigit() and len(personal_id) == 11
 
 class Student:
     def __init__(self,name,surname,age,id,password):
