@@ -419,14 +419,14 @@ class Ui_MainWindow(object):
         MainWindow.setStatusBar(self.statusbar)
 
         self.retranslateUi(MainWindow)
-        self.stackedWidget.setCurrentIndex(4)
+        self.stackedWidget.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
         self.title_main.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-size:20pt; color:#ffffff;\">უნიჰაბი</span></p></body></html>"))
-        self.desc_label.setText(_translate("MainWindow", "<html><head/><body><p align=\"justify\"><span style=\" font-size:10pt; font-weight:400; color:#ffffff;\">მოგესალმებით, <br/>გთხოვთ აირჩიოთ თქვენთვის შესაბამისი სტატუსი ღილაკზე დაჭერით და მიჰყვეთ ინსტრუქციას.<br/>მადლობას გიხდით ჩვენი პლატფორმით სარგელობისთვის. წარმატებები! </span></p></body></html>"))
+        self.desc_label.setText(_translate("MainWindow", "<html><head/><body><p align=\"justify\"><span style=\" font-size:10pt; font-weight:400; color:#000000;\">მოგესალმებით, <br/>გთხოვთ აირჩიოთ თქვენთვის შესაბამისი სტატუსი ღილაკზე დაჭერით და მიჰყვეთ ინსტრუქციას.<br/>მადლობას გიხდით ჩვენი პლატფორმით სარგელობისთვის. წარმატებები! </span></p></body></html>"))
         self.status_choose.setText(_translate("MainWindow", " სისტემაში შესასვლელად გთხოვთ აირჩიოთ თქვენი სტატუსი"))
         self.admin_opt.setText(_translate("MainWindow", "ადმინი"))
         self.student_opt.setText(_translate("MainWindow", "აბიტურიენტი"))
