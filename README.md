@@ -48,3 +48,4 @@ UniHub არის დესკტოპ აპლიკაცია, რომ
    python main.py
    ```
 ---
+inspired by NAEC.
