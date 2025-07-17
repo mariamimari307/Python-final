@@ -1,56 +1,43 @@
 import sqlite3
 from PyQt5.QtWidgets import QMessageBox
+from PyQt5 import QtWidgets
+
 from database import connect_db
 
 class StudentLogic:
     def __init__(self, main_window):
         self.main_window = main_window
         self.ui = main_window.ui
+        self.students_crud = Students_Crud(self.ui)
 
         self.ui.auth_btn_student.clicked.connect(self.login_student)
         self.ui.reg_btn.clicked.connect(self.register_student)
 
-    def show_message(self, title, text, icon=QMessageBox.Warning):
-        msg = QMessageBox(self.main_window)
-        msg.setIcon(icon)
-        msg.setWindowTitle(title)
-        msg.setText(text)
-        msg.setStandardButtons(QMessageBox.Ok)
-        msg.setStyleSheet("""
-            QMessageBox {
-                background-color: #2c003e;
-                color: white;
-                font: bold 12pt 'Arial';
-                border: 2px solid #9900cc;}
-                
-            QPushButton {
-                background-color: #9900cc;
-                color: white;
-                border-radius: 5px;
-                padding: 5px 15px;}
-                
-            QPushButton:hover {background-color: #cc33ff;}""")
-
-        msg.exec_()
 
     def login_student(self):
         personal_id = self.ui.id_input.text()
         password = self.ui.pass_input_student.text()
-
         if not self.is_valid_personal_id(personal_id):
-            self.show_message("შეცდომა", "პირადი ნომერი უნდა შეიცავდეს მხოლოდ 11 ციფრს.")
+            QMessageBox.warning(self.main_window, "შეცდომა", "პირადი ნომერი უნდა შეიცავდეს 11 ციფრს.")
             return
-
         try:
             conn = connect_db()
             cur = conn.cursor()
             cur.execute("SELECT * FROM students WHERE personal_id=? AND password=?", (personal_id, password))
             if cur.fetchone():
                 self.ui.stackedWidget.setCurrentWidget(self.ui.student_profile)
+                self.ui.id_label_student.setText(f"პირადი ნომერი: {personal_id}")
+                self.load_universities_to_combo()
+                self.students_crud._load_choices_to_table()
+                cur.execute(f"""CREATE TABLE IF NOT EXISTS choice_{personal_id} (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    uni INTEGER UNIQUE
+                    )""")
+
             else:
-                self.show_message("შეცდომა", "არასწორი მონაცემები.")
+                QMessageBox.warning(self.main_window, "შეცდომა", "არასწორი მონაცემები.")
         except Exception as e:
-            self.show_message("ბაზის შეცდომა", f"დაფიქსირდა ბაზის შეცდომა: {e}", QMessageBox.Critical)
+            QMessageBox.critical(self.main_window, "ბაზის შეცდომა", f"დაფიქსირდა ბაზის შეცდომა: {e}")
         finally:
             conn.close()
 
@@ -59,74 +46,138 @@ class StudentLogic:
         password = self.ui.pass_input_student.text()
 
         if not self.is_valid_personal_id(personal_id):
-            self.show_message("შეცდომა", "პირადი ნომერი უნდა შეიცავდეს მხოლოდ 11 ციფრს.")
+            QMessageBox.warning(self.main_window, "შეცდომა", "პირადი ნომერი უნდა შეიცავდეს 11 ციფრს.")
             return
-
         if not all([personal_id, password]):
-            self.show_message("შეცდომა", "ყველა ველი სავალდებულოა.")
+            QMessageBox.warning(self.main_window, "შეცდომა", "ყველა ველი სავალდებულოა.")
             return
-
         try:
             conn = connect_db()
             cur = conn.cursor()
             cur.execute("INSERT INTO students (personal_id, password) VALUES (?, ?)", (personal_id, password))
             conn.commit()
-            self.show_message("წარმატება", "სტუდენტი რეგისტრირებულია.", QMessageBox.Information)
+            QMessageBox.information(self.main_window, "წარმატება", "სტუდენტი რეგისტრირებულია.")
             self.login_student()
         except sqlite3.IntegrityError:
-            self.show_message("შეცდომა", "ეს პირადი ნომერი უკვე რეგისტრირებულია.")
+            QMessageBox.warning(self.main_window, "შეცდომა", "ეს პირადი ნომერი უკვე რეგისტრირებულია.")
         except Exception as e:
-            self.show_message("შეცდომა", f"დაფიქსირდა შეცდომა: {e}", QMessageBox.Critical)
+            QMessageBox.critical(self.main_window, "შეცდომა", f"დაფიქსირდა შეცდომა: {e}")
         finally:
             conn.close()
 
     def is_valid_personal_id(self, personal_id):
         return personal_id.isdigit() and len(personal_id) == 11
+    
+    def load_universities_to_combo(self):
+        try:
+            conn = connect_db()
+            cur = conn.cursor()
+            cur.execute("SELECT uni_id, name FROM universities")
+            universities = cur.fetchall()
+
+            self.ui.uni_combo.clear()
+
+            for uni_id, name in universities:
+                self.ui.uni_combo.addItem(f"{name}", uni_id)  # ტექსტი ჩანს როგორც name, value არის uni_id
+
+        except Exception as e:
+            QMessageBox.warning(self.main_window, "შეცდომა", f"უნივერსიტეტების ჩატვირთვის შეცდომა: {e}")
+        finally:
+            conn.close()
 
 
 class Student:
-    def __init__(self, name, surname, age, id, password):
+    def __init__(self,name,surname,age,id,password):
         self.name = name
         self.surname = surname
         self.age = age
-        self.id = id
+        self.id =id
         self.password = password
-
     def stud_tuple(self):
-        return (self.name, self.surname, self.age, self.id, self.password)
-
+        return (self.name,self.surname,self.age,self.id,self.password)
 
 class Students_Crud:
-    def __init__(self, db="unihub_app.db"):
+    def __init__(self, ui, db="unihub_app.db"):
+        self.ui = ui
         self.conn = sqlite3.connect(db)
         self.cursor = self.conn.cursor()
+        
+        self.ui.add_btn_student.clicked.connect(self._insert_choice) 
+        self.ui.del_btn_student.clicked.connect(self._remove_choice)
 
-    def Uni_list(self, student):
-        IDs = self.cursor.execute(f"SELECT uni FROM choice_{student.id}").fetchall()
-        s = set()
-        for i in IDs:
-            s.add(self.cursor.execute(f"""SELECT uni_id, places, faculty, name FROM universities
-                WHERE uni_id={i[0]}""").fetchall()[0])
-        for i in s:
-            print(i[0], i[1], i[2], i[3])
+    def _insert_choice(self):
+        personal_id = self.ui.id_input.text()   # იღებს სტუდენტის პირად ნომერს ტექსტური ველიდან.
+        index = self.ui.uni_combo.currentIndex() #ComboBox-დან იღებს ამჟამად არჩეულ უნივერსიტეტის index-ს.
+        uni_id = self.ui.uni_combo.itemData(index) #itemData(index) აბრუნებს ComboBox-ში ჩასმულ რეალურ მნიშვნელობას, ანუ uni_id.
 
-    def insert_student(self, student: Student):
-        # აქ იქნება ექსეპშენი, სტუდენტი თუ უკვე დარეგისტრირებულია
-        self.cursor.execute("""INSERT OR IGNORE INTO students (name, surname, year, personal_id, password)
-            VALUES (?, ?, ?, ?, ?)""", student.stud_tuple())
-        self.cursor.execute(f"""CREATE TABLE IF NOT EXISTS choice_{student.id}
-            (id INTEGER PRIMARY KEY AUTOINCREMENT, uni INTEGER);""")
-        self.conn.commit()
+        try:
+            self.insert_choice(personal_id, (uni_id,))  # tuple-ის გადაცემა
+            QMessageBox.information(None, "წარმატება", "დაემატა არჩევანი")
+            self._load_choices_to_table()  # ამ ფუქნციას ვიძახებთ რომ ცხრილი განახლდეს და დაემატოს ვიზუალურად
+        except Exception as e:
+            QMessageBox.warning(None, "შეცდომა", str(e))
 
     def insert_choice(self, id, uni):
-        self.cursor.execute(f"INSERT OR IGNORE INTO choice_{id} (uni) VALUES(?)", uni)
-        self.conn.commit()
+        #ბაზაში ამატებს არჩეულ უნივერსიტეტს ამ სტუდენტის "choice_<id>" ცხრილში
+        #OR IGNORE ნიშნავს რომ იგივე იდენტიფიკატორი მეორედ არ დაემატება.
+        self.cursor.execute(f"INSERT OR IGNORE INTO choice_{id} (uni) VALUES(?)", uni) 
+        self.conn.commit() #ცვლილების შენახვა
+
+    def _load_choices_to_table(self):
+        personal_id = self.ui.id_input.text()
+
+        try:
+            # ვამოწმებთ choice_<id> არსებობს თუ არა
+            self.cursor.execute(f"""
+                SELECT name FROM sqlite_master 
+                WHERE type='table' AND name=?
+            """, (f"choice_{personal_id}",))
+            table_exists = self.cursor.fetchone()
+
+            if not table_exists:
+                return  # თუ არ არსებობს ცხრილი, უბრალოდ ვტოვებთ ფუნქციას ჩუმად
+
+            self.ui.priority_table.setRowCount(0)
+
+            results = self.cursor.execute(f"""
+                SELECT u.uni_id, u.name, u.faculty, u.places
+                FROM universities u
+                JOIN choice_{personal_id} c ON u.uni_id = c.uni
+                ORDER BY c.id ASC
+            """).fetchall()
+
+            for row_idx, row_data in enumerate(results):
+                self.ui.priority_table.insertRow(row_idx)
+                for col_idx, value in enumerate(row_data):
+                    item = QtWidgets.QTableWidgetItem(str(value))
+                    self.ui.priority_table.setItem(row_idx, col_idx, item)
+
+        except Exception as e:
+            QMessageBox.warning(None, "შეცდომა", f"ცხრილის განახლება ვერ მოხერხდა: {e}")
+
+    def _remove_choice(self):
+        personal_id = self.ui.id_input.text()
+        row = self.ui.priority_table.currentRow() #ამჟამად მონიშნული სტრიქონი
+
+        #თუ სტრიქონი არ არის მონიშნული, აჩვენებს შეცდომას
+        if row == -1:
+            QMessageBox.warning(None, "შეცდომა", "აირჩიე წასაშლელი ჩანაწერი.")
+            return
+
+        uni_id_item = self.ui.priority_table.item(row, 0)   #0 აქ არის სვეტის ნომერი ამ შემთხვევაში uni-id
+        if uni_id_item is None:                             #row არის სტრიქონის ნომერი
+            QMessageBox.warning(None, "შეცდომა", "ვერ მოიძებნა იდენტიფიკატორი.")
+            return
+
+        uni_id = uni_id_item.text()
+
+        try:
+            self.remove_choice(personal_id, (uni_id,))
+            QMessageBox.information(None, "წარმატება", "წაიშალა არჩევანი.")
+            self._load_choices_to_table()  # ცხრილის განახლება
+        except Exception as e:
+            QMessageBox.warning(None, "შეცდომა", f"წაშლის შეცდომა: {e}")
 
     def remove_choice(self, id, uni):
         self.cursor.execute(f"DELETE FROM choice_{id} WHERE uni=?", uni)
-        self.conn.commit()
-
-    def remove_student(self, id):
-        self.cursor.execute(f"DELETE FROM students WHERE personal_id={id}")
-        self.cursor.execute(f"DROP TABLE IF EXISTS choice_{id}")
         self.conn.commit()
