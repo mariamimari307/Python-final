@@ -25,8 +25,7 @@ class MainWindow(QMainWindow):
                     spread:pad, x1:0, y1:0, x2:1, y2:1,
                     stop:0 #ff4da6, stop:1 #a64bf4);}
 
-            QLabel {
-                color: white;
+            QLabel {color: white;
                 background: transparent;}
 
             QPushButton {
@@ -41,8 +40,7 @@ class MainWindow(QMainWindow):
                 background-color: rgba(255, 255, 255, 0.15);
                 border: 1px solid white;}
 
-            QPushButton:pressed {
-                background-color: rgba(255, 255, 255, 0.25);}
+            QPushButton:pressed {background-color: rgba(255, 255, 255, 0.25);}
 
             QLineEdit {
                 background-color: rgba(255, 255, 255, 0.06);
@@ -73,9 +71,7 @@ class MainWindow(QMainWindow):
                 selection-background-color: #ff99e6;
                 selection-color: black;}
 
-            QFrame {background: transparent;}
-            
-        """)
+            QFrame {background: transparent;}""")
         
         self.ui.stackedWidget.setCurrentWidget(self.ui.main)
 
@@ -114,7 +110,6 @@ class MainWindow(QMainWindow):
         self.ui.stackedWidget.setCurrentWidget(self.ui.main)
         self.setWindowTitle("Welcome to UniHub!")
         self.repaint()
-
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
