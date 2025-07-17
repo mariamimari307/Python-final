@@ -1,3 +1,4 @@
+import sqlite3
 from PyQt5.QtWidgets import QMessageBox
 from database import connect_db
 
@@ -101,3 +102,26 @@ class AdminLogic:
         finally:
             conn.close()
 
+class University_Crud:
+    def __init__(self,db="unihub_app.db"):
+        self.conn = sqlite3.connect(db)
+        self.cursor = self.conn.cursor()
+    def add_uni(self,uni):
+        self.cursor.execute("""
+        INSERT INTO universities (uni_id,name,faculty,credits,price,places)
+        VALUES(?,?,?,?,?,?)
+        """,uni)
+        self.conn.commit()
+    def update_uni(self,uni):
+        self.cursor.execute("""
+        UPDATE universities SET name=?,faculty=?,credits=?,price=?,places=?
+        WHERE uni_id=?""",uni)
+        self.conn.commit()
+    def remove_uni(self,id):
+        self.cursor.execute(f"""
+        DELETE FROM universities WHERE uni_id={id}""")
+        self.conn.commit()
+    def Load_unis(self):
+        listi = self.cursor.execute("SELECT uni_id,places,faculty,name FROM universities").fetchall()
+        for i in listi:
+            print(i)

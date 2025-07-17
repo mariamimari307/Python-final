@@ -84,6 +84,7 @@ class Ui_MainWindow(object):
         self.id_input.setObjectName("id_input")
         self.pass_input_student = QtWidgets.QLineEdit(self.student)
         self.pass_input_student.setGeometry(QtCore.QRect(250, 220, 151, 31))
+        self.pass_input_student.setEchoMode(QtWidgets.QLineEdit.Password)
         self.pass_input_student.setObjectName("pass_input_student")
         self.id_label = QtWidgets.QLabel(self.student)
         self.id_label.setGeometry(QtCore.QRect(100, 170, 131, 31))
@@ -269,6 +270,7 @@ class Ui_MainWindow(object):
         self.name_admin.setObjectName("name_admin")
         self.pass_input_admin = QtWidgets.QLineEdit(self.admin)
         self.pass_input_admin.setGeometry(QtCore.QRect(260, 230, 151, 31))
+        self.pass_input_admin.setEchoMode(QtWidgets.QLineEdit.Password)
         self.pass_input_admin.setObjectName("pass_input_admin")
         self.admin_back = QtWidgets.QPushButton(self.admin)
         self.admin_back.setGeometry(QtCore.QRect(10, 290, 131, 31))
@@ -401,7 +403,7 @@ class Ui_MainWindow(object):
         MainWindow.setStatusBar(self.statusbar)
 
         self.retranslateUi(MainWindow)
-        self.stackedWidget.setCurrentIndex(1)
+        self.stackedWidget.setCurrentIndex(3)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
@@ -453,13 +455,3 @@ class Ui_MainWindow(object):
         item = self.priority_table_2.horizontalHeaderItem(3)
         item.setText(_translate("MainWindow", "სასწავლო დაწესებულება"))
         self.uni_admin_2.setText(_translate("MainWindow", "<html><head/><body><p align=\"right\"><span style=\" color:#ffffff;\">ID:</span></p></body></html>"))
-
-
-if __name__ == "__main__":
-    import sys
-    app = QtWidgets.QApplication(sys.argv)
-    MainWindow = QtWidgets.QMainWindow()
-    ui = Ui_MainWindow()
-    ui.setupUi(MainWindow)
-    MainWindow.show()
-    sys.exit(app.exec_())

@@ -1,3 +1,4 @@
+import sqlite3
 from PyQt5.QtWidgets import QMessageBox
 from database import connect_db
 
@@ -39,3 +40,45 @@ class StudentLogic:
             QMessageBox.warning(self.main_window, "შეცდომა", f"დაფიქსირდა შეცდომა: {e}")
         finally:
             conn.close()
+
+class Student:
+    def __init__(self,name,surname,age,id,password):
+        self.name = name
+        self.surname = surname
+        self.age = age
+        self.id =id
+        self.password = password
+    def stud_tuple(self):
+        return (self.name,self.surname,self.age,self.id,self.password)
+
+class Students_Crud:
+    def __init__(self,db="unihub_app.db"):
+        self.conn = sqlite3.connect(db)
+        self.cursor = self.conn.cursor()
+
+    def Uni_list(self,student):
+        IDs = self.cursor.execute(f"SELECT uni FROM choice_{student.id}").fetchall()
+        s = set()
+        for i in IDs:
+            s.add(self.cursor.execute(f"""SELECT uni_id,places,faculty,name FROM universities
+            WHERE uni_id={i[0]}""").fetchall()[0])
+        for i in s:
+            print(i[0],i[1],i[2],i[3])
+    def insert_student(self,student:Student):
+        # აქ იქნება ექსეპშენი, სტუდენტი თუ უკვე დარეგისტრირებულია
+        self.cursor.execute(""" INSERT OR IGNORE INTO students (name,surname,year,personal_id,password)
+        VALUES(?,?,?,?,?)
+    """,student.stud_tuple())
+        self.cursor.execute(f"""CREATE TABLE IF NOT EXISTS choice_{student.id}
+            (id INTEGER PRIMARY KEY AUTOINCREMENT,uni INTEGER);""")
+        self.conn.commit()
+    def insert_choice(self,id,uni):
+        self.cursor.execute(f"INSERT OR IGNORE INTO choice_{id} (uni) VALUES(?)",uni)
+        self.conn.commit()
+    def remove_choice(self,id,uni):
+        self.cursor.execute(f"DELETE FROM choice_{id} WHERE uni=? ",uni)
+        self.conn.commit()
+    def remove_student(self,id):
+        self.cursor.execute(f"DELETE FROM students WHERE personal_id={id}",)
+        self.cursor.execute(f"DROP TABLE IF EXISTS choice_{id}")
+        self.conn.commit()
