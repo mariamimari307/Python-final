@@ -26,7 +26,7 @@ class StudentLogic:
             cur.execute("SELECT * FROM students WHERE personal_id=? AND password=?", (personal_id, password))
             if cur.fetchone():
                 self.ui.stackedWidget.setCurrentWidget(self.ui.student_profile)
-                self.ui.id_label_student.setText(f"პირადი ნომერი: {personal_id}")
+                self.ui.id_label_student_2.setText(personal_id)
                 self.load_universities_to_combo()
                 self.students_crud._load_choices_to_table()
                 cur.execute(f"""CREATE TABLE IF NOT EXISTS choice_{personal_id} (
@@ -78,7 +78,7 @@ class StudentLogic:
             self.ui.uni_combo.clear()
 
             for uni_id, name in universities:
-                self.ui.uni_combo.addItem(f"{name}", uni_id)  # ტექსტი ჩანს როგორც name, value არის uni_id
+                self.ui.uni_combo.addItem(f"{uni_id} ({name})", uni_id) 
 
         except Exception as e:
             QMessageBox.warning(self.main_window, "შეცდომა", f"უნივერსიტეტების ჩატვირთვის შეცდომა: {e}")
@@ -87,14 +87,11 @@ class StudentLogic:
 
 
 class Student:
-    def __init__(self,name,surname,age,id,password):
-        self.name = name
-        self.surname = surname
-        self.age = age
+    def __init__(self,id,password):
         self.id =id
         self.password = password
     def stud_tuple(self):
-        return (self.name,self.surname,self.age,self.id,self.password)
+        return (self.id,self.password)
 
 class Students_Crud:
     def __init__(self, ui, db="unihub_app.db"):
@@ -106,28 +103,25 @@ class Students_Crud:
         self.ui.del_btn_student.clicked.connect(self._remove_choice)
 
     def _insert_choice(self):
-        personal_id = self.ui.id_input.text()   # იღებს სტუდენტის პირად ნომერს ტექსტური ველიდან.
-        index = self.ui.uni_combo.currentIndex() #ComboBox-დან იღებს ამჟამად არჩეულ უნივერსიტეტის index-ს.
-        uni_id = self.ui.uni_combo.itemData(index) #itemData(index) აბრუნებს ComboBox-ში ჩასმულ რეალურ მნიშვნელობას, ანუ uni_id.
+        personal_id = self.ui.id_input.text() 
+        index = self.ui.uni_combo.currentIndex() 
+        uni_id = self.ui.uni_combo.itemData(index) 
 
         try:
-            self.insert_choice(personal_id, (uni_id,))  # tuple-ის გადაცემა
+            self.insert_choice(personal_id, (uni_id,))
             QMessageBox.information(None, "წარმატება", "დაემატა არჩევანი")
-            self._load_choices_to_table()  # ამ ფუქნციას ვიძახებთ რომ ცხრილი განახლდეს და დაემატოს ვიზუალურად
+            self._load_choices_to_table()
         except Exception as e:
             QMessageBox.warning(None, "შეცდომა", str(e))
 
     def insert_choice(self, id, uni):
-        #ბაზაში ამატებს არჩეულ უნივერსიტეტს ამ სტუდენტის "choice_<id>" ცხრილში
-        #OR IGNORE ნიშნავს რომ იგივე იდენტიფიკატორი მეორედ არ დაემატება.
         self.cursor.execute(f"INSERT OR IGNORE INTO choice_{id} (uni) VALUES(?)", uni) 
-        self.conn.commit() #ცვლილების შენახვა
+        self.conn.commit() 
 
     def _load_choices_to_table(self):
         personal_id = self.ui.id_input.text()
 
         try:
-            # ვამოწმებთ choice_<id> არსებობს თუ არა
             self.cursor.execute(f"""
                 SELECT name FROM sqlite_master 
                 WHERE type='table' AND name=?
@@ -135,12 +129,12 @@ class Students_Crud:
             table_exists = self.cursor.fetchone()
 
             if not table_exists:
-                return  # თუ არ არსებობს ცხრილი, უბრალოდ ვტოვებთ ფუნქციას ჩუმად
+                return  
 
             self.ui.priority_table.setRowCount(0)
 
             results = self.cursor.execute(f"""
-                SELECT u.uni_id, u.name, u.faculty, u.places
+                SELECT u.uni_id, u.places, u.faculty, u.name
                 FROM universities u
                 JOIN choice_{personal_id} c ON u.uni_id = c.uni
                 ORDER BY c.id ASC
@@ -157,15 +151,14 @@ class Students_Crud:
 
     def _remove_choice(self):
         personal_id = self.ui.id_input.text()
-        row = self.ui.priority_table.currentRow() #ამჟამად მონიშნული სტრიქონი
+        row = self.ui.priority_table.currentRow()
 
-        #თუ სტრიქონი არ არის მონიშნული, აჩვენებს შეცდომას
         if row == -1:
             QMessageBox.warning(None, "შეცდომა", "აირჩიე წასაშლელი ჩანაწერი.")
             return
 
-        uni_id_item = self.ui.priority_table.item(row, 0)   #0 აქ არის სვეტის ნომერი ამ შემთხვევაში uni-id
-        if uni_id_item is None:                             #row არის სტრიქონის ნომერი
+        uni_id_item = self.ui.priority_table.item(row, 0)   
+        if uni_id_item is None:                             
             QMessageBox.warning(None, "შეცდომა", "ვერ მოიძებნა იდენტიფიკატორი.")
             return
 
@@ -174,7 +167,7 @@ class Students_Crud:
         try:
             self.remove_choice(personal_id, (uni_id,))
             QMessageBox.information(None, "წარმატება", "წაიშალა არჩევანი.")
-            self._load_choices_to_table()  # ცხრილის განახლება
+            self._load_choices_to_table()  
         except Exception as e:
             QMessageBox.warning(None, "შეცდომა", f"წაშლის შეცდომა: {e}")
 

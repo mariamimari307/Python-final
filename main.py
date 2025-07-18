@@ -1,8 +1,8 @@
 import sys
 from PyQt5.QtWidgets import QApplication, QMainWindow, QDesktopWidget
 from designQT5 import Ui_MainWindow
-from admin_logic import AdminLogic, University_Crud
-from student_logic import StudentLogic, Student, Students_Crud
+from admin_logic import AdminLogic
+from student_logic import StudentLogic
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -86,8 +86,6 @@ class MainWindow(QMainWindow):
 
         self.admin_logic = AdminLogic(self)
         self.student_logic = StudentLogic(self)
-        self.students_crud = Students_Crud(self.ui)
-        self.uni_crud = University_Crud()
 
 
     def admin_login(self):

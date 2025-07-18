@@ -238,6 +238,14 @@ class Ui_MainWindow(object):
         font.setWeight(75)
         self.back_main_student.setFont(font)
         self.back_main_student.setObjectName("back_main_student")
+        self.id_label_student_2 = QtWidgets.QLabel(self.student_profile)
+        self.id_label_student_2.setGeometry(QtCore.QRect(220, 80, 161, 31))
+        font = QtGui.QFont()
+        font.setFamily("Ubuntu Mono")
+        font.setBold(True)
+        font.setWeight(75)
+        self.id_label_student_2.setFont(font)
+        self.id_label_student_2.setObjectName("id_label_student_2")
         self.stackedWidget.addWidget(self.student_profile)
         self.admin = QtWidgets.QWidget()
         self.admin.setObjectName("admin")
@@ -451,6 +459,7 @@ class Ui_MainWindow(object):
         self.del_btn_student.setText(_translate("MainWindow", "წაშლა"))
         self.desc_label_2.setText(_translate("MainWindow", "<html><head/><body><p align=\"justify\"><span style=\" font-size:10pt; font-weight:400; color:#000000;\">ინფორმაციის შეყვანისას დარწმუნდით მის სისწორეში.</span></p></body></html>"))
         self.back_main_student.setText(_translate("MainWindow", "მთავარი"))
+        self.id_label_student_2.setText(_translate("MainWindow", "<html><head/><body><p><br/></p></body></html>"))
         self.auth_btn_admin.setText(_translate("MainWindow", "ავტორიზაცია"))
         self.pass_admin.setText(_translate("MainWindow", "<html><head/><body><p align=\"right\"><span style=\" color:#ffffff;\">პაროლი</span></p></body></html>"))
         self.precise_label_admin.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-size:9pt; color:#000000;\">სისტემაში შესასვლელად შეიყვანეთ ზუსტი მონაცემები</span></p></body></html>"))
@@ -473,13 +482,3 @@ class Ui_MainWindow(object):
         item.setText(_translate("MainWindow", "სასწავლო დაწესებულება"))
         self.uni_admin_2.setText(_translate("MainWindow", "<html><head/><body><p align=\"right\"><span style=\" color:#ffffff;\">ID:</span></p></body></html>"))
         self.back_main_admin.setText(_translate("MainWindow", "მთავარი"))
-
-
-if __name__ == "__main__":
-    import sys
-    app = QtWidgets.QApplication(sys.argv)
-    MainWindow = QtWidgets.QMainWindow()
-    ui = Ui_MainWindow()
-    ui.setupUi(MainWindow)
-    MainWindow.show()
-    sys.exit(app.exec_())

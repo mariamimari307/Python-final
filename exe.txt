@@ -1,1 +1,0 @@
-pyinstaller --onefile --windowed main.py --add-data "UNIHUB.ui;." --add-data "unihub_app.db;."
