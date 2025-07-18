@@ -122,32 +122,38 @@ class Students_Crud:
         personal_id = self.ui.id_input.text()
 
         try:
-            self.cursor.execute(f"""
+            self.cursor.execute("""
                 SELECT name FROM sqlite_master 
                 WHERE type='table' AND name=?
             """, (f"choice_{personal_id}",))
             table_exists = self.cursor.fetchone()
 
             if not table_exists:
-                return  
+                return
 
             self.ui.priority_table.setRowCount(0)
+            row_number = 0
 
             results = self.cursor.execute(f"""
-                SELECT u.uni_id, u.places, u.faculty, u.name
+                SELECT u.uni_id, u.name, u.faculty, u.places
                 FROM universities u
                 JOIN choice_{personal_id} c ON u.uni_id = c.uni
                 ORDER BY c.id ASC
             """).fetchall()
 
-            for row_idx, row_data in enumerate(results):
-                self.ui.priority_table.insertRow(row_idx)
-                for col_idx, value in enumerate(row_data):
-                    item = QtWidgets.QTableWidgetItem(str(value))
-                    self.ui.priority_table.setItem(row_idx, col_idx, item)
+            for row in results:
+                self.ui.priority_table.insertRow(row_number)
+
+                self.ui.priority_table.setItem(row_number, 0, QtWidgets.QTableWidgetItem(str(row[0])))  # uni_id
+                self.ui.priority_table.setItem(row_number, 1, QtWidgets.QTableWidgetItem(str(row[3])))  # places
+                self.ui.priority_table.setItem(row_number, 2, QtWidgets.QTableWidgetItem(str(row[2])))  # faculty
+                self.ui.priority_table.setItem(row_number, 3, QtWidgets.QTableWidgetItem(str(row[1])))  # name
+
+                row_number += 1
 
         except Exception as e:
-            QMessageBox.warning(None, "შეცდომა", f"ცხრილის განახლება ვერ მოხერხდა: {e}")
+            self.show_message("შეცდომა", f"მონაცემების ჩატვირთვის პრობლემა: {e}", QtWidgets.QMessageBox.Critical)
+
 
     def _remove_choice(self):
         personal_id = self.ui.id_input.text()
