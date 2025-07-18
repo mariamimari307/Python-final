@@ -86,7 +86,7 @@ class MainWindow(QMainWindow):
 
         self.admin_logic = AdminLogic(self)
         self.student_logic = StudentLogic(self)
-        self.students_crud = Students_Crud()
+        self.students_crud = Students_Crud(self.ui)
         self.uni_crud = University_Crud()
 
 
