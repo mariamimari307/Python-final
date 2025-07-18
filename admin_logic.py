@@ -8,13 +8,11 @@ class AdminLogic:
         self.main_window = main_window
         self.ui = main_window.ui
 
-        # ღილაკების კლიკებზე ფუნქციების დაკავშირება
         self.ui.auth_btn_admin.clicked.connect(self.login_admin)
         self.ui.add_btn_admin.clicked.connect(self.add_university)
         self.ui.del_btn_admin.clicked.connect(self.delete_university)
         self.ui.renew_btn_admin.clicked.connect(self.update_university)
 
-        # პირველი ლოდინი - ჩატვირთვისას ცხრილის გასუფთავება და დატვირთვა
         self.load_priority_table()
 
     def show_message(self, title, text, icon=QMessageBox.Warning):
@@ -48,7 +46,7 @@ class AdminLogic:
             cur.execute("SELECT * FROM admin WHERE username=? AND password=?", (username, password))
             if cur.fetchone():
                 self.ui.stackedWidget.setCurrentWidget(self.ui.admin_base)
-                self.load_priority_table()  # ავატვირთოთ ცხრილი ადმინის ლოგინთან
+                self.load_priority_table()
             else:
                 self.show_message("შეცდომა", "არასწორი მონაცემები.")
         except Exception as e:
@@ -57,7 +55,6 @@ class AdminLogic:
             conn.close()
 
     def load_priority_table(self):
-        """მონაცემების წამოღება ბაზიდან და დაბეჭდვა priority_table_2-ში"""
         try:
             conn = connect_db()
             cur = conn.cursor()
@@ -67,10 +64,10 @@ class AdminLogic:
             for row_number, row_data in enumerate(rows):
                 self.ui.priority_table_2.insertRow(row_number)
 
-                item_id = QTableWidgetItem(str(row_data[0]))        # ID - uni_id
-                item_places = QTableWidgetItem(str(row_data[3]))    # ადგილი - places
-                item_faculty = QTableWidgetItem(str(row_data[2]))   # ფაკულტეტი - faculty
-                item_name = QTableWidgetItem(str(row_data[1]))      # სასწავლებელი - name
+                item_id = QTableWidgetItem(str(row_data[0]))    
+                item_places = QTableWidgetItem(str(row_data[3]))   
+                item_faculty = QTableWidgetItem(str(row_data[2]))  
+                item_name = QTableWidgetItem(str(row_data[1]))      
 
                 self.ui.priority_table_2.setItem(row_number, 0, item_id)
                 self.ui.priority_table_2.setItem(row_number, 1, item_places)
@@ -102,7 +99,7 @@ class AdminLogic:
             self.ui.uni_input_admin.clear()
             self.ui.faculty_input_admin.clear()
             self.ui.count_input_admin.clear()
-            self.load_priority_table()  # ცხრილის განახლება
+            self.load_priority_table() 
         except sqlite3.IntegrityError:
             self.show_message("შეცდომა", "ასეთი ID ან დასახელება უკვე არსებობს.")
         except Exception as e:
@@ -125,7 +122,7 @@ class AdminLogic:
                 conn.commit()
                 self.show_message("წარმატება", "უნივერსიტეტი წაშლილია.", QMessageBox.Information)
                 self.ui.uni_input_admin_2.clear()
-                self.load_priority_table()  # ცხრილის განახლება
+                self.load_priority_table() 
         except Exception as e:
             self.show_message("შეცდომა", f"წაშლის შეცდომა: {e}", QMessageBox.Critical)
         finally:
@@ -152,7 +149,7 @@ class AdminLogic:
             self.ui.uni_input_admin.clear()
             self.ui.faculty_input_admin.clear()
             self.ui.count_input_admin.clear()
-            self.load_priority_table()  # ცხრილის განახლება
+            self.load_priority_table() 
         except Exception as e:
             self.show_message("შეცდომა", f"დაფიქსირდა შეცდომა: {e}", QMessageBox.Critical)
         finally:
